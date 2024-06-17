@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); //used to remove the status bar
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []); //used to remove the status bar
   runApp(const MyApp());
 }
 
@@ -294,31 +297,35 @@ class _LoginPageState extends State<LoginPage> {
                 Expanded(
                   child: Container(
                     color: Colors.transparent,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CircleAvatar(
-                            backgroundImage: const AssetImage('assets/image/facebook.png'),
-                            radius: 20,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundImage: const AssetImage('assets/image/facebook.png'),
+                              radius: 20,
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CircleAvatar(
-                            backgroundImage: const AssetImage('assets/image/google.jpeg'),
-                            radius: 20,
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundImage: const AssetImage('assets/image/google.jpeg'),
+                              radius: 20,
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CircleAvatar(
-                            backgroundImage: const AssetImage('assets/image/tuit.png'),
-                            radius: 20,
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundImage: const AssetImage('assets/image/tuit.png'),
+                              radius: 20,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
