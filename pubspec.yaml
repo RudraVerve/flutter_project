@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  sqflite: any
+  path_provider: any
   cupertino_icons: ^1.0.2
   shared_preferences: ^2.0.15  # Add this line for shared_preferences
 
@@ -45,3 +47,8 @@ flutter:
 
   assets:
     - assets/image/
+
+fonts:
+  - family: GooglFont
+    fonts:
+      - asset: assets/font/DancingScript-VariableFont_wght.ttf
