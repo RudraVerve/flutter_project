@@ -48,7 +48,7 @@ class db_helper {
         $c_email TEXT NOT NULL,
         $c_pass TEXT NOT NULL,
         $c_address TEXT NOT NULL,
-        $c_mobile TEXT NOT NULL,
+        $c_mobile TEXT UNIQUE,
         $c_gender TEXT NOT NULL,
         $c_facbook TEXT NOT NULL,
         $c_insta TEXT NOT NULL,
@@ -60,6 +60,7 @@ class db_helper {
 
   Future<int> insert(Map<String, dynamic> row) async {
     try {
+      // Database db = await instance.database;
       Database db = await instance.database;
       return await db.insert(t_name, row);
     } catch (e) {
@@ -78,22 +79,54 @@ class db_helper {
     }
   }
 
-  Future<void> deleteDatabaseFile() async {
+  Future<int> deleteDatabaseAlldata() async {
+      Database db = await instance.database;
+      if(t_name.isNotEmpty){
+        var deletee= await db.delete(t_name);
+        return deletee;
+      }
+      else{
+        print("table is not exist");
+        return -1;
+      }
+  }
+
+  Future<int> deleteSpacific(int id) async {
+    // Database db = await instance.database;
+    Database db = await instance.database;
     try {
-      if (_dbPath != null) {
-        File dbFile = File(_dbPath!);
-        if (await dbFile.exists()) {
-          await dbFile.delete();
-          _database = null; // Reset the _database instance to ensure it’s recreated
-          print("Database deleted successfully");
+      if (t_name.isNotEmpty) {
+        var deletedRowCount = await db.delete(
+          "$t_name",
+          where: "$c_id = ?",
+          whereArgs: [id],
+        );
+        if (deletedRowCount > 0) {
+          print("Deleted $deletedRowCount row(s) from $t_name where $c_id = $id");
         } else {
-          print("Database does not exist");
+          print("No rows deleted. No match for id = $id.");
         }
+
+        return deletedRowCount;
       } else {
-        print("Database path is null");
+        print("Table name is empty. Unable to delete.");
+        return -1;
       }
     } catch (e) {
-      print("Error deleting database: $e");
+      print("Error deleting specific row: $e");
+      return -1;
+    }
+  }
+
+  Future<int> updateSpacific(int id, String email, String name, String Address, String Mob) async {
+    Database db = await instance.database;
+    if(t_name.isNotEmpty){
+      var update = await db.update(t_name, {"$c_name":"$name", "$c_email":"$email", "$c_address":"$Address", "$c_mobile":"$Mob"}, where: "id = ?",whereArgs: [id] );
+      return update;
+    }
+    else{
+      print("table is not exist");
+      return -1;
     }
   }
 }

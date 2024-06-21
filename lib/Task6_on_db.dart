@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_app_rudra/db/db_helping.dart';
-
 import 'db/dataviewer.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); //used to remove the status bar
@@ -46,8 +45,6 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController instaurlController = TextEditingController();
   TextEditingController tuterurlController = TextEditingController();
 
-
-
   final _formKey = GlobalKey<FormState>();
 
   bool showPassword = false;
@@ -86,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String? validatePassword(String? value) {
-    if (value == null || value.length < 6 || value.length > 8) {
+    if (value == null || value.length < 6 ) {
       return 'Password must be between 6 to 8 characters';
     }
 
@@ -203,6 +200,46 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   } //fopr the tuter avatar
+  void _showErrorSubmitDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) { // Renamed to avoid confusion
+        return AlertDialog(
+          backgroundColor: Colors.lightGreenAccent,
+          title: Text('Something went wrong',style: TextStyle(color: Colors.red,fontWeight: FontWeight.w600),),
+          content: Text('An unexpected error has occurred. Plese Fix the Error or try again later.',style: TextStyle(fontSize: 18),), // Added content
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Use dialogContext to close the dialog
+              },
+              child: Text('Cancel',style: TextStyle(fontSize: 20),),
+            ),
+          ],
+        );
+      },
+    );
+  } // for the error subbmit massage
+  void _showErrormobDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) { // Renamed to avoid confusion
+        return AlertDialog(
+          backgroundColor: Colors.lightGreenAccent,
+          title: Text('Mobile number Allrady Exist',style: TextStyle(color: Colors.red,fontWeight: FontWeight.w600),),
+          content: Text('The mobile number is alrady Exist Plese use a deferent one or try again later.',style: TextStyle(fontSize: 18),), // Added content
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Use dialogContext to close the dialog
+              },
+              child: Text('Cancel',style: TextStyle(fontSize: 20),),
+            ),
+          ],
+        );
+      },
+    );
+  }//mobile no.alrady exist
 
   final dbhelper=db_helper.instance;
 
@@ -219,7 +256,9 @@ class _MyHomePageState extends State<MyHomePage> {
       db_helper.c_tuiter : tuterurlController.text.isNotEmpty ? tuterurlController.text : 'Not avalable',
     };
     final id= await dbhelper.insert(row);
-    print('id:${id}');
+    if(id==-1){
+      _showErrormobDialog(context);
+    }
   }
 
   @override
@@ -239,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Colors.pink.withOpacity(0.8),
                   Colors.deepPurpleAccent.withOpacity(0.5),
                 ],
-              ),
+              ),//used to give multilpe colour
             ),
             child:Padding(
               padding: const EdgeInsets.all(8.0),
@@ -519,48 +558,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-void _showErrorSubmitDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext dialogContext) { // Renamed to avoid confusion
-      return AlertDialog(
-        backgroundColor: Colors.lightGreenAccent,
-        title: Text('Something went wrong',style: TextStyle(color: Colors.red,fontWeight: FontWeight.w600),),
-        content: Text('An unexpected error has occurred. Plese Fix the Error or try again later.',style: TextStyle(fontSize: 18),), // Added content
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop(); // Use dialogContext to close the dialog
-            },
-            child: Text('Cancel',style: TextStyle(fontSize: 20),),
-          ),
-        ],
-      );
-    },
-  );
-} // for the error subbmit massage
-
-void _showErrorDetailsDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext dialogContext) { // Renamed to avoid confusion
-      return AlertDialog(
-        backgroundColor: Colors.lightGreenAccent,
-        title: Text('Something went wrong',style: TextStyle(color: Colors.red,fontWeight: FontWeight.w600),),
-        content: Text('An unexpected error has occurred. There Is No Data In The Database',style: TextStyle(fontSize: 18),), // Added content
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop(); // Use dialogContext to close the dialog
-            },
-            child: Text('Cancel',style: TextStyle(fontSize: 20),),
-          ),
-        ],
-      );
-    },
-  );
-} // for the error details massage
 
 
 
