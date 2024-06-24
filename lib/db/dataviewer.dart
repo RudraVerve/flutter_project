@@ -31,6 +31,7 @@ class _DataViewerState extends State<DataViewer> {
       await dbhelper.deleteDatabaseAlldata();
       setState(() {
         rows.clear();
+        fetchRows();
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Database deleted successfully!')),
@@ -91,6 +92,7 @@ class _DataViewerState extends State<DataViewer> {
             ),
             TextButton(
               onPressed: () {
+                // dbhelper.deleteDatabaseFile();
                 deleteDatabaseAlldata();
                 Navigator.of(dialogContext).pop();
               },
@@ -137,13 +139,6 @@ class _DataViewerState extends State<DataViewer> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'ID: ${row[db_helper.c_id]}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
                       Text(
                         'Name: ${row[db_helper.c_name]}',
                         style: TextStyle(

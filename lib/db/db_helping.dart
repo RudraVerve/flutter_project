@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dta_inset_byusing_object.dart';
 
 class db_helper {
   static final db_name = 'my_database.db';
@@ -18,6 +19,8 @@ class db_helper {
   static final c_facbook = 'facbook';
   static final c_insta = 'insta';
   static final c_tuiter = 'tuiter';
+  static final c_object_data ='object';
+
 
   static Database? _database;
   static String? _dbPath;
@@ -52,16 +55,32 @@ class db_helper {
         $c_gender TEXT NOT NULL,
         $c_facbook TEXT NOT NULL,
         $c_insta TEXT NOT NULL,
-        $c_tuiter TEXT NOT NULL
+        $c_tuiter TEXT NOT NULL,
+        $c_object_data TEXT NOT NULL
       )
       '''
     );
   }
 
-  Future<int> insert(Map<String, dynamic> row) async {
+  Future<int> insert(DataInsertHelper dataInsertHelper ) async {
     try {
       // Database db = await instance.database;
       Database db = await instance.database;
+      Map<String, dynamic> row = {
+        db_helper.c_name: dataInsertHelper.name,
+        db_helper.c_email:dataInsertHelper.email,
+        db_helper.c_pass:dataInsertHelper.pass,
+        db_helper.c_address:dataInsertHelper.address,
+        db_helper.c_mobile: dataInsertHelper.phone,
+        db_helper.c_gender: dataInsertHelper.isMale ? 'Male' : 'Female',
+        db_helper.c_facbook:
+        dataInsertHelper.facebook!.isNotEmpty ? dataInsertHelper.facebook : 'Not available',
+        db_helper.c_insta:
+        dataInsertHelper.insta!.isNotEmpty ? dataInsertHelper.insta: 'Not available',
+        db_helper.c_tuiter:
+        dataInsertHelper.twit!.isNotEmpty ? dataInsertHelper.twit : 'Not available',
+        db_helper.c_object_data: dataInsertHelper.toJsonString()
+      };
       return await db.insert(t_name, row);
     } catch (e) {
       print("Error inserting data: $e");
@@ -129,4 +148,40 @@ class db_helper {
       return -1;
     }
   }
+
+  // Future<void> deleteDatabaseFile() async {
+  //   try {
+  //     // Close any open database connections
+  //     await db_helper.instance.database.then((db) => db.close());
+  //
+  //     // Get the directory where the database file is located
+  //     Directory documentsDirectory = await getApplicationDocumentsDirectory();
+  //     String dbPath = db_helper._dbPath ?? join(documentsDirectory.path, db_helper.db_name);
+  //
+  //     // Create a File object for the database file
+  //     File dbFile = File(dbPath);
+  //
+  //     // Check if the file exists before attempting to delete it
+  //     if (await dbFile.exists()) {
+  //       // Delete the file
+  //       await dbFile.delete();
+  //       print('Deleted database file: $dbPath');
+  //     } else {
+  //       print('Database file does not exist.');
+  //     }
+  //   } catch (e) {
+  //     print('Error deleting database file: $e');
+  //   }
+  // }
+
+  // Future<void> reopenDatabase() async {
+  //   if (_database != null && _database!.isOpen) {
+  //     print("Database is already open.");
+  //   } else {
+  //     Directory documentDirectory = await getApplicationDocumentsDirectory();
+  //     _dbPath = join(documentDirectory.path, db_name);
+  //     _database = await openDatabase(_dbPath!, version: db_version, onCreate: _oncreate);
+  //     print("Database reopened successfully.");
+  //   }
+  // }
 }

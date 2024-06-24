@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_app_rudra/db/db_helping.dart';
 import 'db/dataviewer.dart';
+import 'db/dta_inset_byusing_object.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); //used to remove the status bar
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []); //used to remove the status bar
@@ -50,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showPassword = false;
   bool isMale = true;
 
-   void clearForm(){
+  void clearForm(){
      emailInputController.clear();
      passwordInputController.clear();
      phoneInputController.clear();
@@ -220,47 +222,48 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   } // for the error subbmit massage
-  void _showErrormobDialog(BuildContext context) {
+  // _DataViewerState widget
+  void insertData() {
+      var dataInsertHelper = DataInsertHelper(
+      name: nameInputController.text,
+      email: emailInputController.text,
+      pass: passwordInputController.text,
+      address: addressInputController.text,
+      phone: phoneInputController.text,
+      facebook: facebookurlController.text,
+      insta: instaurlController.text,
+      twit: tuterurlController.text,
+      isMale: isMale,
+    );
+    Future<void> insertquery() async {
+        final dbhelper = db_helper.instance;
+        final id = await dbhelper.insert(dataInsertHelper);
+        if (id == -1) {
+          _showErrormobDialog();
+        }
+    }
+    insertquery();
+  }
+
+  void _showErrormobDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext dialogContext) { // Renamed to avoid confusion
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
-          backgroundColor: Colors.lightGreenAccent,
-          title: Text('Mobile number Allrady Exist',style: TextStyle(color: Colors.red,fontWeight: FontWeight.w600),),
-          content: Text('The mobile number is alrady Exist Plese use a deferent one or try again later.',style: TextStyle(fontSize: 18),), // Added content
+          title: Text('Error'),
+          content: Text('This mobile number is already in use.'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(); // Use dialogContext to close the dialog
+                Navigator.of(dialogContext).pop();
               },
-              child: Text('Cancel',style: TextStyle(fontSize: 20),),
+              child: Text('OK'),
             ),
           ],
         );
       },
     );
-  }//mobile no.alrady exist
-
-  final dbhelper=db_helper.instance;
-
-  void insertquery() async{
-    Map<String, dynamic> row={
-      db_helper.c_name : nameInputController.text,
-      db_helper.c_email : emailInputController.text,
-      db_helper.c_pass : passwordInputController.text,
-      db_helper.c_address : addressInputController.text,
-      db_helper.c_mobile : phoneInputController.text,
-      db_helper.c_gender : isMale ? 'Male':'Female',
-      db_helper.c_facbook : facebookurlController.text.isNotEmpty ? facebookurlController.text : 'Not avalable',
-      db_helper.c_insta : instaurlController.text.isNotEmpty ? instaurlController.text : 'Not avalable',
-      db_helper.c_tuiter : tuterurlController.text.isNotEmpty ? tuterurlController.text : 'Not avalable',
-    };
-    final id= await dbhelper.insert(row);
-    if(id==-1){
-      _showErrormobDialog(context);
-    }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -453,7 +456,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: ElevatedButton(
                               onPressed: () {
                                 if ((_formKey.currentState?.validate() ?? false) && nameInputController.text.isNotEmpty && addressInputController.text.isNotEmpty && phoneInputController.text.isNotEmpty) {
-                                  insertquery();
+                                  insertData();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('data added successfully')),
                                   );
@@ -554,10 +557,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ]
         )
-
     );
   }
 }
-
-
-
