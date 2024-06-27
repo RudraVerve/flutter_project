@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'IdCardDisplay.dart';
 import 'db_helper.dart';
+import 'insert_data.dart';
 
 class IdList extends StatefulWidget {
   const IdList({super.key});
@@ -11,10 +13,15 @@ class IdList extends StatefulWidget {
 
 class _IdListState extends State<IdList> {
 
+  TextEditingController rollController1 = TextEditingController();
   final dbhelper = db_helper.instance;
   List<Map<String, dynamic>> rows = [];
   List<Map<String, dynamic>> rows1 = [];
 
+  //for the search button
+  String? rollDilog;
+
+  //for multiple row
   String? roll;
   String? name;
   String? collage;
@@ -22,6 +29,7 @@ class _IdListState extends State<IdList> {
   String? dob;
   String? rollno;
 
+  //for single row
   String? roll0;
   String? name0;
   String? collage0;
@@ -67,6 +75,22 @@ class _IdListState extends State<IdList> {
       print("Error fetching rows: $e");
     }
   }
+  Future<void> update(String roll, String name, String Collage, String Domen, String Dob)async{
+    var obj = insert_data(
+      name: name,
+      colage: Collage,
+      roll: roll,
+      domen: Domen,
+      dob: Dob,
+    );
+    await dbhelper.updateSpacific(roll, obj);
+    setState(() {
+      fetchAllRows();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Record Update successfully!')),
+    );
+  }
 
   //Dialog code/methords
   void _showWarning(String id) {
@@ -101,12 +125,110 @@ class _IdListState extends State<IdList> {
       },
     );
   }
+  void _idDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter Roll Number To see The Id Card'),
+          content: TextFormField(
+            controller: rollController1,
+            decoration: InputDecoration(
+              hintText: 'Enter Roll Number',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog without action
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                rollDilog = rollController1.text;
+                if (rollDilog != null && rollDilog!.isNotEmpty) {
+                  await fetchRow(rollDilog!);
+                  Navigator.of(context).pop(); // Close the dialog
+                  if (rows1.isNotEmpty ) {
+                    Map<String, dynamic> info1 = jsonDecode(rows[0]['info']);
+                    name0 = info1['name'];
+                    collage0 = info1['colage'];
+                    rollno0 = rows1[0]['roll'];
+                    domen0 = info1['domen'];
+                    dob0 = info1['dob'];
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => IdCardDisplay(
+                          collage: collage0,
+                          name: name0,
+                          roll: rollno0,
+                          domen: domen0,
+                          dob: dob0,
+                        ),
+                      ),
+                    );
+                  } else {
+                    // Show a message if no data is found
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Error'),
+                        content: Text('No data found for the provided roll number.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                }
+                else {
+                  Navigator.of(context).pop();
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Error'),
+                      content: Text('Input Field Is Empty'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
+              child: Text('View'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('List\'s of Id Card'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(onPressed:(){
+              _idDialog(context);
+              rollController1.clear();
+            }, icon:Icon(Icons.search,color: Colors.deepPurple,)),
+          )
+        ],
       ),
 
       body:rows.isEmpty
@@ -135,11 +257,27 @@ class _IdListState extends State<IdList> {
                       width: 50,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
+                        // borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Colors.black, // Border color
-                          width: 1.0,        // Border width
+                          color: Colors.black,
+                          width: 1.0,
                         ),
+                      ),
+                      child: FutureBuilder<Uint8List?>(
+                        future: db_helper.instance.getImage(rows[index]['roll']),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return CircularProgressIndicator(); // Loading indicator
+                          } else if (snapshot.connectionState == ConnectionState.done) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              return Image.memory(
+                                snapshot.data!,
+                                fit: BoxFit.cover,
+                              );
+                            }
+                          }
+                          return Text('no data found');
+                        },
                       ),
                     ),
                     Row(
@@ -183,7 +321,122 @@ class _IdListState extends State<IdList> {
                                 Icons.edit,
                                 color: Colors.green,
                               ),
-                              onPressed: (){},
+                              onPressed: (){
+                                showDialog(context: context, builder:(BuildContext dialogContext){
+
+                                  TextEditingController updateRollController = TextEditingController(text: rollno);
+                                  TextEditingController UpdateCollageController = TextEditingController(text: collage);
+                                  TextEditingController UpdateNameController = TextEditingController(text: name);
+                                  TextEditingController UpdateDomenController = TextEditingController(text: domen);
+                                  TextEditingController UpdateDobController = TextEditingController(text: dob);
+
+                                  return AlertDialog(
+                                    title:Text('Update ${name} Details'),
+                                    content:SingleChildScrollView(
+                                      child: Form(
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: TextFormField(
+                                                controller:UpdateCollageController,
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  hintText: 'Enter your Update Collage Name',
+                                                  suffixIcon: Icon(
+                                                    Icons.school,
+                                                    color: Colors.cyan,
+                                                  ),
+                                                  focusedBorder: UnderlineInputBorder(
+                                                    borderSide: BorderSide(color: Colors.green),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: TextFormField(
+                                                controller:UpdateNameController,
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  hintText: 'Enter your Update Name',
+                                                  suffixIcon: Icon(
+                                                    Icons.man,
+                                                    color: Colors.cyan,
+                                                  ),
+                                                  focusedBorder: UnderlineInputBorder(
+                                                    borderSide: BorderSide(color: Colors.green),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: TextFormField(
+                                                controller:updateRollController,
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  hintText: 'Enter your Update Roll Number',
+                                                  suffixIcon: Icon(
+                                                    Icons.ac_unit,
+                                                    color: Colors.cyan,
+                                                  ),
+                                                  focusedBorder: UnderlineInputBorder(
+                                                    borderSide: BorderSide(color: Colors.green),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: TextFormField(
+                                                controller:UpdateDomenController,
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  hintText: 'Enter your Update Domen',
+                                                  suffixIcon: Icon(
+                                                    Icons.workspaces_filled,
+                                                    color: Colors.cyan,
+                                                  ),
+                                                  focusedBorder: UnderlineInputBorder(
+                                                    borderSide: BorderSide(color: Colors.green),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: TextFormField(
+                                                controller:UpdateDobController,
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  hintText: 'Enter your Update DOB: DD/MM/YYYY',
+                                                  suffixIcon: Icon(
+                                                    Icons.date_range,
+                                                    color: Colors.cyan,
+                                                  ),
+                                                  focusedBorder: UnderlineInputBorder(
+                                                    borderSide: BorderSide(color: Colors.green),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(onPressed: (){
+                                        Navigator.of(context).pop();
+                                      }, child:Text('Cancel')),
+                                      TextButton(onPressed: (){
+                                        update(updateRollController.text, UpdateNameController.text, UpdateCollageController.text, UpdateDomenController.text, UpdateDobController.text);
+                                        Navigator.of(context).pop();
+                                      }, child: Text('Submit'))
+                                    ],
+                                  );
+                                });
+                              },
                             ),
                             IconButton(
                               iconSize: 16.0, // desired size

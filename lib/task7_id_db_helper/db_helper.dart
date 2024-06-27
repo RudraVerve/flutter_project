@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,8 +10,10 @@ class db_helper {
   static final db_version = 1;
   static final t_name = 'Student_info';
 
+  //COLUMN
   static final s_roll = 'roll';
   static final s_info = 'info';
+  static final columnImage = 'image';
 
   static Database? _database;
   static String? _dbPath;
@@ -36,17 +39,19 @@ class db_helper {
     await db.execute('''
       CREATE TABLE $t_name(
         $s_roll TEXT PRIMARY KEY,
+        $columnImage BLOB NOT NULL,
         $s_info TEXT
       )
     ''');
   }
 
-  Future<int> insert(insert_data data, String roll) async {
+  Future<int> insert(insert_data data, String roll, Uint8List image) async {
     try {
       Database db = await instance.database;
       Map<String, dynamic> row = {
         s_info: data.toJsonString(),
-        s_roll:roll
+        s_roll:roll,
+        columnImage: image,
       };
       return await db.insert(t_name, row);
     } catch (e) {
@@ -102,6 +107,31 @@ class db_helper {
       }
     } catch (e) {
       print("Error deleting specific row: $e");
+      return -1;
+    }
+  }
+
+  Future<Uint8List?> getImage(String id) async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(t_name,
+        columns: [columnImage],
+        where: '$s_roll = ?',
+        whereArgs: [id]);
+
+    if (maps.isNotEmpty) {
+      return maps.first[columnImage];
+    }
+    return null;
+  }
+
+  Future<int> updateSpacific(String roll, insert_data obj) async {
+    Database db = await instance.database;
+    if(t_name.isNotEmpty){
+      var update = await db.update(t_name, {"$s_roll":"$roll", "$s_info":obj.toJsonString()}, where: "$s_roll = ?",whereArgs: [roll] );
+      return update;
+    }
+    else{
+      print("table is not exist");
       return -1;
     }
   }

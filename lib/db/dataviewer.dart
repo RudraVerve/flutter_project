@@ -65,7 +65,7 @@ class _DataViewerState extends State<DataViewer> {
         SnackBar(content: Text('Record Update successfully!')),
       );
     } catch (e) {
-      print("Error deleting record: $e");
+      print("Error updating record: $e");
     }
   }
 

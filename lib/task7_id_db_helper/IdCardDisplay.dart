@@ -1,6 +1,8 @@
+import 'dart:typed_data';
+import 'db_helper.dart';
 import 'package:flutter/material.dart';
 
-class IdCardDisplay extends StatelessWidget {
+class IdCardDisplay extends StatefulWidget {
   final String? collage;
   final String? name;
   final String? roll;
@@ -14,6 +16,28 @@ class IdCardDisplay extends StatelessWidget {
     this.domen,
     this.dob,
   });
+
+  @override
+  _IdCardDisplayState createState() => _IdCardDisplayState();
+}
+
+class _IdCardDisplayState extends State<IdCardDisplay> {
+  int i = 0;
+  List<String> stringList = [
+    'id1.jpg', 'id2.jpeg', 'id3.jpg', 'id4.png', 'id5.jpg',
+    'id6.png', 'id7.jpg','id8.jpg', 'id9.jpg', 'id10.jpg','id11.jpg',
+    'id12.jpeg', 'id13.jpg', 'id14.png', 'id15.jpg', 'id16.jpg', 'id17.jpeg',
+    'id18.jpg', 'id19.jpeg', 'id20.jpeg', 'id21.jpeg', 'id22.jpeg', 'id23.jpg',
+  ];
+
+  String get currentImagePath => 'assets/image/${stringList[i]}';
+
+  void pathChange() {
+    setState(() {
+      i = (i + 1) % stringList.length; // Cycle through the images
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,73 +45,150 @@ class IdCardDisplay extends StatelessWidget {
         title: Text('ID Card'),
       ),
       body: Center(
-        child: Container(
-          height: 500,
-          width: 300,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/image/id1.jpg'),
-              fit: BoxFit.cover,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 500,
+              width: 300,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(currentImagePath),
+                  fit: BoxFit.cover,
+                ),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.black, // Border color
+                  width: 3.0,        // Border width
+                ),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      child: Text(
+                        widget.collage ?? 'No Collage',
+                        textAlign: TextAlign.center, // Center aligns the text
+                        style: TextStyle(
+                          fontFamily: 'LibreBaskerville',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black, // Adjust text color if necessary
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Container(
+                      height: 150,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: Colors.black, // Border color
+                          width: 2.0,        // Border width
+                        ),
+                      ),
+                      child: FutureBuilder<Uint8List?>(
+                        future: db_helper.instance.getImage(widget.roll!),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return CircularProgressIndicator(); // Loading indicator
+                          } else if (snapshot.connectionState == ConnectionState.done) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              return Image.memory(
+                                snapshot.data!,
+                                fit: BoxFit.cover,
+                              );
+                            }
+                          }
+                          return Text('No data found');
+                        },
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            'NAME: ${widget.name ?? 'No Name'}',
+                            style: TextStyle(
+                              fontFamily: 'LibreBaskerville',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black, // Adjust text color if necessary
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            'ROLL: ${widget.roll ?? 'No Roll'}',
+                            style: TextStyle(
+                              fontFamily: 'LibreBaskerville',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black, // Adjust text color if necessary
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            'DOMEN: ${widget.domen ?? 'No Domen'}',
+                            style: TextStyle(
+                              fontFamily: 'LibreBaskerville',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black, // Adjust text color if necessary
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            'DOB: ${widget.dob ?? 'No DOB'}',
+                            style: TextStyle(
+                              fontFamily: 'LibreBaskerville',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black, // Adjust text color if necessary
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.black, // Border color
-              width: 3.0,        // Border width
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: pathChange,
+                    child: Text('Update Theme'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    child: Text('Download'),
+                  ),
+                ),
+              ],
             ),
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  child: Text(
-                    '$collage',
-                    textAlign: TextAlign.center, // Center aligns the text
-                    style: TextStyle(
-                      fontFamily: 'LibreBaskerville',
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black, // Adjust text color if necessary
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Container(
-                  height: 150,
-                  width: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.black, // Border color
-                      width: 2.0,        // Border width
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  child: Text(
-                        'Name: ${name ?? 'N/A'}\n'
-                        'Roll: ${roll ?? 'N/A'}\n'
-                        'Domen: ${domen ?? 'N/A'}\n'
-                        'DOB: ${dob ?? 'N/A'}',
-                    textAlign: TextAlign.center, // Center aligns the text
-                    style: TextStyle(
-                      fontFamily: 'LibreBaskerville',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black, // Adjust text color if necessary
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );

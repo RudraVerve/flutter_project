@@ -2,12 +2,12 @@
 // import 'package:flutter/material.dart';
 // import 'IdCardDisplay.dart';
 // import 'db_helper.dart';
-
+//
 // class viewData extends StatefulWidget {
 //   @override
 //   _DataViewerState createState() => _DataViewerState();
 // }
-
+//
 // class _DataViewerState extends State<viewData> {
 //   TextEditingController idController = TextEditingController();
 //   final dbhelper = db_helper.instance;
