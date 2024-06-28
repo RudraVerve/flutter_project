@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -5,6 +7,7 @@ import 'dart:typed_data';
 import 'package:my_app_rudra/task7_id_db_helper/db_helper.dart';
 import 'package:my_app_rudra/task7_id_db_helper/insert_data.dart';
 import 'package:my_app_rudra/task7_id_db_helper/list_of_ids.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
     dobController.clear();
   }
 
-  Future<void> _insert(Uint8List imageBytes) async {
+  Future<void> _insert(Uint8List imageBytes, Uint8List imageBytes2) async {
     var obj = insert_data(
       name: nameController.text,
       colage: collageController.text,
@@ -78,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
       domen: domenController.text,
       dob: dobController.text,
     );
-    final id = await dbhelper.insert(obj, obj.roll!, imageBytes);
+    final id = await dbhelper.insert(obj, obj.roll!, imageBytes, imageBytes2);
     if (id == -1) {
       _UniqueRollDialog();
       print("Not inserted");
@@ -89,14 +92,13 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
   }
-
-  Future<void> _pickAndStoreImage() async {
+  Future<void> _pickAndStoreImage(Uint8List imageBytesQr) async {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
         Uint8List imageBytes = await pickedFile.readAsBytes();
-        _insert(imageBytes);
+        _insert(imageBytes, imageBytesQr);
         clearForm();
       }
     } catch (e) {
@@ -104,6 +106,32 @@ class _MyHomePageState extends State<MyHomePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error picking image: $e')),
       );
+    }
+  }
+  Future<void> generateAndStoreQrCode(String data) async {
+    if(data.isEmpty){
+      setState(() {
+        data = "NO DATA FOUND";
+      });
+    }
+    final qrValidationResult = QrValidator.validate(
+      data: data,
+      version: QrVersions.auto,
+      errorCorrectionLevel: QrErrorCorrectLevel.L,
+    );
+    if (qrValidationResult.status == QrValidationStatus.valid) {
+      final qrCode = qrValidationResult.qrCode;
+      final painter = QrPainter.withQr(
+        qr: qrCode!,
+        color: Colors.pink, //QR CODE COLOR
+        gapless: true,
+      );
+      final image = await painter.toImage(300);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      final imageBytes = byteData!.buffer.asUint8List();
+      await _pickAndStoreImage(imageBytes);
+    } else {
+      print("Invalid QR code data");
     }
   }
 
@@ -126,7 +154,6 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-
   void _ErrorfieldDialog() {
     showDialog(
       context: context,
@@ -145,6 +172,44 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       },
     );
+  }
+  Future<void> _AddMoreDetailsDialog()async{
+    showDialog(context: context, builder: (BuildContext dialogContext){
+      TextEditingController allDetailsController = TextEditingController();
+      return AlertDialog(
+        title:Text('Add More Details About Student For QR'),
+        content:TextField(
+          controller: allDetailsController,
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+          decoration: InputDecoration(
+            filled: true,
+            hintText: 'Enter All details separeted with ,',
+            suffixIcon: Icon(
+              Icons.details,
+              color: Colors.cyan,
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.green),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: ()async{
+            Navigator.of(context).pop();
+            await generateAndStoreQrCode(allDetailsController.text);
+            }, child: Text('NO')
+          ),
+          TextButton(onPressed: ()async{
+            Navigator.of(context).pop();
+            setState(() {
+              allDetailsController.clear();
+            });
+            await generateAndStoreQrCode(allDetailsController.text);
+          }, child:Text('ADD'))
+        ],
+      );
+    });
   }
 
   @override
@@ -325,13 +390,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton(
-                        onPressed: () async {
+                        onPressed: () {
                           if (nameController.text.isNotEmpty &&
                               collageController.text.isNotEmpty &&
                               rollController.text.isNotEmpty &&
                               domenController.text.isNotEmpty &&
                               dobController.text.isNotEmpty) {
-                            await _pickAndStoreImage();
+                            _AddMoreDetailsDialog();
                           } else {
                             _ErrorfieldDialog();
                           }

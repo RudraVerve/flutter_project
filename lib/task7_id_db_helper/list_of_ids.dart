@@ -324,11 +324,11 @@ class _IdListState extends State<IdList> {
                               onPressed: (){
                                 showDialog(context: context, builder:(BuildContext dialogContext){
 
-                                  TextEditingController updateRollController = TextEditingController(text: rollno);
-                                  TextEditingController UpdateCollageController = TextEditingController(text: collage);
-                                  TextEditingController UpdateNameController = TextEditingController(text: name);
-                                  TextEditingController UpdateDomenController = TextEditingController(text: domen);
-                                  TextEditingController UpdateDobController = TextEditingController(text: dob);
+                                  TextEditingController updateRollController = TextEditingController(text: rows[index]['roll']);
+                                  TextEditingController UpdateCollageController = TextEditingController(text: info['colage']);
+                                  TextEditingController UpdateNameController = TextEditingController(text: info['name']);
+                                  TextEditingController UpdateDomenController = TextEditingController(text: info['domen']);
+                                  TextEditingController UpdateDobController = TextEditingController(text: info['dob']);
 
                                   return AlertDialog(
                                     title:Text('Update ${name} Details'),

@@ -14,6 +14,7 @@ class db_helper {
   static final s_roll = 'roll';
   static final s_info = 'info';
   static final columnImage = 'image';
+  static final columnImageQr = 'QrImage';
 
   static Database? _database;
   static String? _dbPath;
@@ -40,18 +41,20 @@ class db_helper {
       CREATE TABLE $t_name(
         $s_roll TEXT PRIMARY KEY,
         $columnImage BLOB NOT NULL,
+        $columnImageQr BLOB NOT NULL,
         $s_info TEXT
       )
     ''');
   }
 
-  Future<int> insert(insert_data data, String roll, Uint8List image) async {
+  Future<int> insert(insert_data data, String roll, Uint8List image, Uint8List imageQr) async {
     try {
       Database db = await instance.database;
       Map<String, dynamic> row = {
         s_info: data.toJsonString(),
         s_roll:roll,
         columnImage: image,
+        columnImageQr:imageQr
       };
       return await db.insert(t_name, row);
     } catch (e) {
@@ -120,6 +123,19 @@ class db_helper {
 
     if (maps.isNotEmpty) {
       return maps.first[columnImage];
+    }
+    return null;
+  }
+
+  Future<Uint8List?> getImageQr(String id) async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(t_name,
+        columns: [columnImageQr],
+        where: '$s_roll = ?',
+        whereArgs: [id]);
+
+    if (maps.isNotEmpty) {
+      return maps.first[columnImageQr];
     }
     return null;
   }

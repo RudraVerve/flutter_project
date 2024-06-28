@@ -6,6 +6,7 @@ class insert_data {
   String? roll;
   String? domen;
   String? dob;
+  String? allDetails;
 
   insert_data({
     required this.name,

@@ -43,6 +43,18 @@ class _IdCardDisplayState extends State<IdCardDisplay> {
     return Scaffold(
       appBar: AppBar(
         title: Text('ID Card'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              backgroundColor: Colors.green,
+              onPressed: (){
+
+              },
+              child: Icon(Icons.download),
+            ),
+          )
+        ],
       ),
       body: Center(
         child: Column(
@@ -111,82 +123,102 @@ class _IdCardDisplayState extends State<IdCardDisplay> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.only(left: 15),
+                    child: Row(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Text(
-                            'NAME: ${widget.name ?? 'No Name'}',
-                            style: TextStyle(
-                              fontFamily: 'LibreBaskerville',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black, // Adjust text color if necessary
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Text(
+                                'NAME: ${widget.name ?? 'No Name'}',
+                                style: TextStyle(
+                                  fontFamily: 'LibreBaskerville',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black, // Adjust text color if necessary
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Text(
-                            'ROLL: ${widget.roll ?? 'No Roll'}',
-                            style: TextStyle(
-                              fontFamily: 'LibreBaskerville',
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black, // Adjust text color if necessary
+                            Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Text(
+                                'ROLL: ${widget.roll ?? 'No Roll'}',
+                                style: TextStyle(
+                                  fontFamily: 'LibreBaskerville',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black, // Adjust text color if necessary
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Text(
-                            'DOMEN: ${widget.domen ?? 'No Domen'}',
-                            style: TextStyle(
-                              fontFamily: 'LibreBaskerville',
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black, // Adjust text color if necessary
+                            Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Text(
+                                'DOMEN: ${widget.domen ?? 'No Domen'}',
+                                style: TextStyle(
+                                  fontFamily: 'LibreBaskerville',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black, // Adjust text color if necessary
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Text(
-                            'DOB: ${widget.dob ?? 'No DOB'}',
-                            style: TextStyle(
-                              fontFamily: 'LibreBaskerville',
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black, // Adjust text color if necessary
+                            Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Text(
+                                'DOB: ${widget.dob ?? 'No DOB'}',
+                                style: TextStyle(
+                                  fontFamily: 'LibreBaskerville',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black, // Adjust text color if necessary
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10,left: 22),
+                    child: Row(
+                      children: [
+                        Container(
+                          child:  FutureBuilder<Uint8List?>(
+                            future: db_helper.instance.getImageQr(widget.roll!),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return CircularProgressIndicator(); // Loading indicator
+                              } else if (snapshot.connectionState == ConnectionState.done) {
+                                if (snapshot.hasData && snapshot.data != null) {
+                                  return Image.memory(
+                                      snapshot.data!,width: 60, height: 60
+                                  );
+                                }
+                              }
+                              return Text('No data found');
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: Text('Scan The QR code\nFor More Details...'),
+                        )
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    onPressed: pathChange,
-                    child: Text('Update Theme'),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: Text('Download'),
-                  ),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: pathChange,
+                child: Text('Update Theme'),
+              ),
             ),
           ],
         ),
