@@ -38,6 +38,8 @@ dependencies:
   qr_flutter: ^4.0.0
   image: ^3.0.1
   shared_preferences: ^2.0.15  # Add this line for shared_preferences
+  image_gallery_saver: ^1.7.1 # Add the latest version
+  permission_handler: ^10.2.0 # Add the latest version
 
 dev_dependencies:
   flutter_test:

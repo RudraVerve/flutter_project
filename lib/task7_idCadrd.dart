@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -43,22 +42,22 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _key = GlobalKey<FormState>();
 
-  TextEditingController collageController = TextEditingController();
+  TextEditingController CompanyController = TextEditingController();
   TextEditingController nameController = TextEditingController();
-  TextEditingController rollController = TextEditingController();
-  TextEditingController domenController = TextEditingController();
+  TextEditingController IdController = TextEditingController();
+  TextEditingController TechnologyController = TextEditingController();
   TextEditingController dobController = TextEditingController();
   TextEditingController idController = TextEditingController();
 
   final dbhelper = db_helper.instance;
   List<Map<String, dynamic>> rows = [];
 
-  String? roll;
+  String? id;
   String? name;
-  String? collage;
-  String? domen;
+  String? Company;
+  String? Technology;
   String? dob;
-  String? rollno;
+  String? idno;
 
   @override
   void initState() {
@@ -66,22 +65,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void clearForm() {
-    collageController.clear();
+    CompanyController.clear();
     nameController.clear();
-    rollController.clear();
-    domenController.clear();
+    IdController.clear();
+    TechnologyController.clear();
     dobController.clear();
   }
 
   Future<void> _insert(Uint8List imageBytes, Uint8List imageBytes2) async {
     var obj = insert_data(
       name: nameController.text,
-      colage: collageController.text,
-      roll: rollController.text,
-      domen: domenController.text,
+      Company: CompanyController.text,
+      id: IdController.text,
+      Technology: TechnologyController.text,
       dob: dobController.text,
     );
-    final id = await dbhelper.insert(obj, obj.roll!, imageBytes, imageBytes2);
+    final id = await dbhelper.insert(obj, obj.id!, imageBytes, imageBytes2);
     if (id == -1) {
       _UniqueRollDialog();
       print("Not inserted");
@@ -141,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Error', style: TextStyle(color: Colors.redAccent)),
-          content: const Text('The Student already exists. The Roll Number must be unique'),
+          content: const Text('The employee already exists. The Id Number must be unique'),
           actions: [
             TextButton(
               onPressed: () {
@@ -177,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
     showDialog(context: context, builder: (BuildContext dialogContext){
       TextEditingController allDetailsController = TextEditingController();
       return AlertDialog(
-        title:Text('Add More Details About Student For QR'),
+        title:Text('Add More Details About employee For QR'),
         content:TextField(
           controller: allDetailsController,
           maxLines: null,
@@ -202,10 +201,10 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           TextButton(onPressed: ()async{
             Navigator.of(context).pop();
+            await generateAndStoreQrCode(allDetailsController.text);
             setState(() {
               allDetailsController.clear();
             });
-            await generateAndStoreQrCode(allDetailsController.text);
           }, child:Text('ADD'))
         ],
       );
@@ -237,8 +236,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   padding: EdgeInsets.all(20.0),
                   child: Center(
                     child: Text(
-                      'ID Card Generator',
-                      style: TextStyle(fontFamily: 'LibreBaskerville', fontSize: 25),
+                      'Employee ID Card Generator',
+                      style: TextStyle(fontFamily: 'LibreBaskerville', fontSize: 22),
                     ),
                   ),
                 ),
@@ -250,12 +249,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: TextFormField(
                           keyboardType: TextInputType.text,
-                          controller: collageController,
+                          controller: CompanyController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.8),
-                            hintText: 'Enter your College Name',
-                            suffixIcon: const Icon(Icons.school, color: Colors.cyan),
+                            hintText: 'Company Name',
+                            suffixIcon: const Icon(Icons.work, color: Colors.cyan),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: const BorderSide(
@@ -281,7 +280,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.8),
-                            hintText: 'Enter your Name',
+                            hintText: 'Employee Name',
                             suffixIcon: const Icon(Icons.person_outline, color: Colors.cyan),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -304,11 +303,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: TextFormField(
                           keyboardType: TextInputType.text,
-                          controller: rollController,
+                          controller: IdController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.8),
-                            hintText: 'Enter your Roll no.',
+                            hintText: 'Employee ID.',
                             suffixIcon: const Icon(Icons.ac_unit, color: Colors.cyan),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -331,11 +330,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: TextFormField(
                           keyboardType: TextInputType.text,
-                          controller: domenController,
+                          controller: TechnologyController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.8),
-                            hintText: 'Enter your Domain',
+                            hintText: 'Technology Assign',
                             suffixIcon: const Icon(Icons.workspaces_filled, color: Colors.cyan),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -362,7 +361,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.8),
-                            hintText: 'Enter your DOB: DD/MM/YYYY',
+                            hintText: 'Employee DOB: DD/MM/YYYY',
                             suffixIcon: const Icon(Icons.date_range, color: Colors.cyan),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -392,9 +391,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       ElevatedButton(
                         onPressed: () {
                           if (nameController.text.isNotEmpty &&
-                              collageController.text.isNotEmpty &&
-                              rollController.text.isNotEmpty &&
-                              domenController.text.isNotEmpty &&
+                              CompanyController.text.isNotEmpty &&
+                              IdController.text.isNotEmpty &&
+                              TechnologyController.text.isNotEmpty &&
                               dobController.text.isNotEmpty) {
                             _AddMoreDetailsDialog();
                           } else {

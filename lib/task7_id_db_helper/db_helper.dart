@@ -11,7 +11,7 @@ class db_helper {
   static final t_name = 'Student_info';
 
   //COLUMN
-  static final s_roll = 'roll';
+  static final s_Id = 'id';
   static final s_info = 'info';
   static final columnImage = 'image';
   static final columnImageQr = 'QrImage';
@@ -39,7 +39,7 @@ class db_helper {
   Future _oncreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE $t_name(
-        $s_roll TEXT PRIMARY KEY,
+        $s_Id TEXT PRIMARY KEY,
         $columnImage BLOB NOT NULL,
         $columnImageQr BLOB NOT NULL,
         $s_info TEXT
@@ -47,12 +47,12 @@ class db_helper {
     ''');
   }
 
-  Future<int> insert(insert_data data, String roll, Uint8List image, Uint8List imageQr) async {
+  Future<int> insert(insert_data data, String Id, Uint8List image, Uint8List imageQr) async {
     try {
       Database db = await instance.database;
       Map<String, dynamic> row = {
         s_info: data.toJsonString(),
-        s_roll:roll,
+        s_Id:Id,
         columnImage: image,
         columnImageQr:imageQr
       };
@@ -63,13 +63,13 @@ class db_helper {
     }
   }
 
-  Future<List<Map<String, dynamic>>> querySpacific(String roll) async {
+  Future<List<Map<String, dynamic>>> querySpacific(String Id) async {
     try {
       Database db = await instance.database;
       List<Map<String, dynamic>> results = await db.query(
         "$t_name",
-        where: "$s_roll = ?",
-        whereArgs: [roll],
+        where: "$s_Id = ?",
+        whereArgs: [Id],
       );
       return results;
     } catch (e) {
@@ -94,11 +94,11 @@ class db_helper {
       if (t_name.isNotEmpty) {
         var deletedRowCount = await db.delete(
           "$t_name",
-          where: "$s_roll = ?",
+          where: "$s_Id = ?",
           whereArgs: [id],
         );
         if (deletedRowCount > 0) {
-          print("Deleted $deletedRowCount row(s) from $t_name where $s_roll = $id");
+          print("Deleted $deletedRowCount row(s) from $t_name where $s_Id = $id");
         } else {
           print("No rows deleted. No match for id = $id.");
         }
@@ -118,7 +118,7 @@ class db_helper {
     Database db = await database;
     List<Map<String, dynamic>> maps = await db.query(t_name,
         columns: [columnImage],
-        where: '$s_roll = ?',
+        where: '$s_Id = ?',
         whereArgs: [id]);
 
     if (maps.isNotEmpty) {
@@ -131,7 +131,7 @@ class db_helper {
     Database db = await database;
     List<Map<String, dynamic>> maps = await db.query(t_name,
         columns: [columnImageQr],
-        where: '$s_roll = ?',
+        where: '$s_Id = ?',
         whereArgs: [id]);
 
     if (maps.isNotEmpty) {
@@ -140,10 +140,10 @@ class db_helper {
     return null;
   }
 
-  Future<int> updateSpacific(String roll, insert_data obj) async {
+  Future<int> updateSpacific(String Id, insert_data obj) async {
     Database db = await instance.database;
     if(t_name.isNotEmpty){
-      var update = await db.update(t_name, {"$s_roll":"$roll", "$s_info":obj.toJsonString()}, where: "$s_roll = ?",whereArgs: [roll] );
+      var update = await db.update(t_name, {"$s_Id":"$Id", "$s_info":obj.toJsonString()}, where: "$s_Id = ?",whereArgs: [Id] );
       return update;
     }
     else{

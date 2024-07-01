@@ -19,23 +19,22 @@ class _IdListState extends State<IdList> {
   List<Map<String, dynamic>> rows1 = [];
 
   //for the search button
-  String? rollDilog;
+  String? idDilog;
 
   //for multiple row
-  String? roll;
   String? name;
-  String? collage;
-  String? domen;
+  String? Company;
+  String? Technology;
   String? dob;
-  String? rollno;
+  String? idno;
 
   //for single row
-  String? roll0;
+  String? id0;
   String? name0;
-  String? collage0;
-  String? domen0;
+  String? Company0;
+  String? Technology0;
   String? dob0;
-  String? rollno0;
+  String? idno0;
 
   @override
   void initState() {
@@ -66,24 +65,24 @@ class _IdListState extends State<IdList> {
       print("Error fetching rows: $e");
     }
   }
-  Future<void> fetchRow(String roll) async {
+  Future<void> fetchRow(String id) async {
     try {
-      rows1 = await dbhelper.querySpacific(roll);
+      rows1 = await dbhelper.querySpacific(id);
       setState(() {});
       print("Fetched rows: $rows1");
     } catch (e) {
       print("Error fetching rows: $e");
     }
   }
-  Future<void> update(String roll, String name, String Collage, String Domen, String Dob)async{
+  Future<void> update(String id, String name, String Company, String Technology, String Dob)async{
     var obj = insert_data(
       name: name,
-      colage: Collage,
-      roll: roll,
-      domen: Domen,
+      Company: Company,
+      id: id,
+      Technology: Technology,
       dob: Dob,
     );
-    await dbhelper.updateSpacific(roll, obj);
+    await dbhelper.updateSpacific(id, obj);
     setState(() {
       fetchAllRows();
     });
@@ -146,25 +145,25 @@ class _IdListState extends State<IdList> {
             ),
             TextButton(
               onPressed: () async {
-                rollDilog = rollController1.text;
-                if (rollDilog != null && rollDilog!.isNotEmpty) {
-                  await fetchRow(rollDilog!);
+                idDilog = rollController1.text;
+                if (idDilog != null && idDilog!.isNotEmpty) {
+                  await fetchRow(idDilog!);
                   Navigator.of(context).pop(); // Close the dialog
                   if (rows1.isNotEmpty ) {
                     Map<String, dynamic> info1 = jsonDecode(rows[0]['info']);
                     name0 = info1['name'];
-                    collage0 = info1['colage'];
-                    rollno0 = rows1[0]['roll'];
-                    domen0 = info1['domen'];
+                    Company0 = info1['Company'];
+                    idno0 = rows1[0]['id'];
+                    Technology0 = info1['Technology'];
                     dob0 = info1['dob'];
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => IdCardDisplay(
-                          collage: collage0,
+                          Company: Company0,
                           name: name0,
-                          roll: rollno0,
-                          domen: domen0,
+                          id: idno0,
+                          Technology: Technology0,
                           dob: dob0,
                         ),
                       ),
@@ -219,7 +218,7 @@ class _IdListState extends State<IdList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('List\'s of Id Card'),
+        title: Center(child: Text('List\'s of Employee')),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -245,9 +244,9 @@ class _IdListState extends State<IdList> {
               itemBuilder: (BuildContext context, int index) {
                 Map<String, dynamic> info = jsonDecode(rows[index]['info']);
                 name = info['name'];
-                collage = info['colage'];
-                rollno = rows[index]['roll'];
-                domen = info['domen'];
+                Company = info['Company'];
+                idno = rows[index]['id'];
+                Technology = info['Technology'];
                 dob = info['dob'];
                 return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -264,7 +263,7 @@ class _IdListState extends State<IdList> {
                         ),
                       ),
                       child: FutureBuilder<Uint8List?>(
-                        future: db_helper.instance.getImage(rows[index]['roll']),
+                        future: db_helper.instance.getImage(rows[index]['id']),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return CircularProgressIndicator(); // Loading indicator
@@ -288,7 +287,7 @@ class _IdListState extends State<IdList> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('NAME:  $name',style: TextStyle(fontFamily: 'LibreBaskerville',fontSize: 12),),
-                              Text('ROLL NO:  $rollno',style: TextStyle(fontFamily: 'LibreBaskerville',fontSize: 12),),
+                              Text('ID:  $idno',style: TextStyle(fontFamily: 'LibreBaskerville',fontSize: 12),),
                             ],
                           ),
                         ),
@@ -307,7 +306,7 @@ class _IdListState extends State<IdList> {
                                 color: Colors.red,
                               ),
                               onPressed: (){
-                                _showWarning(rows[index]['roll']);
+                                _showWarning(rows[index]['id']);
                               },
                             ),
                             IconButton(
@@ -324,10 +323,10 @@ class _IdListState extends State<IdList> {
                               onPressed: (){
                                 showDialog(context: context, builder:(BuildContext dialogContext){
 
-                                  TextEditingController updateRollController = TextEditingController(text: rows[index]['roll']);
-                                  TextEditingController UpdateCollageController = TextEditingController(text: info['colage']);
+                                  TextEditingController updateIdController = TextEditingController(text: rows[index]['id']);
+                                  TextEditingController UpdateCompanyController = TextEditingController(text: info['Company']);
                                   TextEditingController UpdateNameController = TextEditingController(text: info['name']);
-                                  TextEditingController UpdateDomenController = TextEditingController(text: info['domen']);
+                                  TextEditingController UpdateTechnologyController = TextEditingController(text: info['Technology']);
                                   TextEditingController UpdateDobController = TextEditingController(text: info['dob']);
 
                                   return AlertDialog(
@@ -339,10 +338,10 @@ class _IdListState extends State<IdList> {
                                             Padding(
                                               padding: const EdgeInsets.all(8.0),
                                               child: TextFormField(
-                                                controller:UpdateCollageController,
+                                                controller:UpdateCompanyController,
                                                 decoration: InputDecoration(
                                                   filled: true,
-                                                  hintText: 'Enter your Update Collage Name',
+                                                  hintText: 'Enter your Update Company Name',
                                                   suffixIcon: Icon(
                                                     Icons.school,
                                                     color: Colors.cyan,
@@ -373,10 +372,10 @@ class _IdListState extends State<IdList> {
                                             Padding(
                                               padding: const EdgeInsets.all(8.0),
                                               child: TextFormField(
-                                                controller:updateRollController,
+                                                controller:updateIdController,
                                                 decoration: InputDecoration(
                                                   filled: true,
-                                                  hintText: 'Enter your Update Roll Number',
+                                                  hintText: 'Enter your Update Id',
                                                   suffixIcon: Icon(
                                                     Icons.ac_unit,
                                                     color: Colors.cyan,
@@ -390,10 +389,10 @@ class _IdListState extends State<IdList> {
                                             Padding(
                                               padding: const EdgeInsets.all(8.0),
                                               child: TextFormField(
-                                                controller:UpdateDomenController,
+                                                controller:UpdateTechnologyController,
                                                 decoration: InputDecoration(
                                                   filled: true,
-                                                  hintText: 'Enter your Update Domen',
+                                                  hintText: 'Enter your Update Technology',
                                                   suffixIcon: Icon(
                                                     Icons.workspaces_filled,
                                                     color: Colors.cyan,
@@ -430,7 +429,7 @@ class _IdListState extends State<IdList> {
                                         Navigator.of(context).pop();
                                       }, child:Text('Cancel')),
                                       TextButton(onPressed: (){
-                                        update(updateRollController.text, UpdateNameController.text, UpdateCollageController.text, UpdateDomenController.text, UpdateDobController.text);
+                                        update(updateIdController.text, UpdateNameController.text, UpdateCompanyController.text, UpdateTechnologyController.text, UpdateDobController.text);
                                         Navigator.of(context).pop();
                                       }, child: Text('Submit'))
                                     ],
@@ -450,21 +449,21 @@ class _IdListState extends State<IdList> {
                                 color: Colors.deepPurpleAccent,
                               ),
                               onPressed: () async{
-                                await fetchRow(rows[index]['roll']);
+                                await fetchRow(rows[index]['id']);
                                 Map<String, dynamic> info1 = jsonDecode(rows1[0]['info']);
                                 name0 = info1['name'];
-                                collage0 = info1['colage'];
-                                rollno0 = rows1[0]['roll'];
-                                domen0 = info1['domen'];
+                                Company0 = info1['Company'];
+                                idno0 = rows1[0]['id'];
+                                Technology0 = info1['Technology'];
                                 dob0 = info1['dob'];
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => IdCardDisplay(
-                                      collage: collage0,
+                                      Company: Company0,
                                       name: name0,
-                                      roll: rollno0,
-                                      domen: domen0,
+                                      id: idno0,
+                                      Technology: Technology0,
                                       dob: dob0,
                                     ),
                                   ),
