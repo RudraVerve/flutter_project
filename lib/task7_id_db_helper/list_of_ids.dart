@@ -429,7 +429,7 @@ class _IdListState extends State<IdList> {
                                         Navigator.of(context).pop();
                                       }, child:Text('Cancel')),
                                       TextButton(onPressed: (){
-                                        update(updateIdController.text, UpdateNameController.text, UpdateCompanyController.text, UpdateTechnologyController.text, UpdateDobController.text);
+                                        update(updateIdController.text.toUpperCase(), UpdateNameController.text.toUpperCase(), UpdateCompanyController.text.toUpperCase(), UpdateTechnologyController.text.toUpperCase(), UpdateDobController.text.toUpperCase());
                                         Navigator.of(context).pop();
                                       }, child: Text('Submit'))
                                     ],

@@ -10,7 +10,7 @@ class db_helper {
   static final db_version = 1;
   static final t_name = 'Student_info';
 
-  //COLUMN
+  //COLUMNS
   static final s_Id = 'id';
   static final s_info = 'info';
   static final columnImage = 'image';
@@ -19,7 +19,7 @@ class db_helper {
   static Database? _database;
   static String? _dbPath;
 
-  db_helper._privateConstructor();
+  db_helper._privateConstructor(); //use for no conflict. single instance is create.
   static final db_helper instance = db_helper._privateConstructor();
 
   Future<Database> get database async {

@@ -1,10 +1,13 @@
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:ui' as ui;
 import 'db_helper.dart';
-import 'package:flutter/material.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'dart:io';
 
 class IdCardDisplay extends StatefulWidget {
   final String? Company;
@@ -43,7 +46,7 @@ class _IdCardDisplayState extends State<IdCardDisplay> {
     });
   }
 
-  Future<void> _captureAndSave() async {
+  Future<void> _captureAndSave({bool isPdf = false}) async {
     try {
       // Request storage permission
       var status = await Permission.storage.request();
@@ -56,36 +59,60 @@ class _IdCardDisplayState extends State<IdCardDisplay> {
       RenderRepaintBoundary boundary = _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData!.buffer.asUint8List();
+      Uint8List pngBytes = byteData!.buffer.asUint8List(); // list of unsignd 8bit data..
 
-      // Save the image to the gallery
-      final result = await ImageGallerySaver.saveImage(pngBytes, name: "container_image");
-      print('Image saved to gallery: $result');
+      // Save the image to the gallery or as PDF
+      if (!isPdf) {
+        // Save as PNG
+        final result = await ImageGallerySaver.saveImage(pngBytes, name: "container_image");
+        print('Image saved to gallery: $result');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PNG saved to gallery')),
+        );
+      } else {
+        // Save as PDF
+        final pdf = pw.Document();                //create new pdf file
+        pdf.addPage(                              //add a page to the pdf file
+          pw.Page(                                //add the content of the pdf file
+            build: (pw.Context context) {
+              return pw.Center(                   //center the content of the pdf file
+                child: pw.Image(                  //give the image to conver it to pdf
+                  pw.MemoryImage(pngBytes),
+                ),
+              );
+            },
+          ),
+        );
+
+        // Get the download directory path
+        Directory? downloadDirectory;
+        if (Platform.isAndroid) {
+          downloadDirectory = await Directory("/storage/emulated/0/Download"); //store in download
+          // downloadDirectory = await getDownloadsDirectory();          //store in app folder
+        } else {
+          downloadDirectory = await getApplicationDocumentsDirectory();
+        }
+
+        // Save the PDF document in the download path
+        final file = File('${downloadDirectory.path}/container1.pdf');
+        await file.writeAsBytes(await pdf.save());
+
+        print('PDF saved to local storage: ${file.path}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PDF saved to local storage')),
+        );
+      }
     } catch (e) {
       print('Error capturing image: $e');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Employee ID Card'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton(
-              backgroundColor: Colors.green,
-              onPressed: (){
-                _captureAndSave();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Download sucessful')),
-                );
-              },
-              child: Icon(Icons.download),
-            ),
-          )
-        ],
       ),
       body: Center(
         child: Column(
@@ -247,12 +274,45 @@ class _IdCardDisplayState extends State<IdCardDisplay> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: pathChange,
-                child: Text('Update Theme'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: pathChange,
+                    child: Text('Update Theme'),
+                  ),
+                ),
+                Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.download_for_offline, color: Colors.green,size: 30,
+                      ),
+                      onPressed: (){
+                        _captureAndSave();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Download successful')),
+                        );
+                      },
+                    ),
+                    Text('.png',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 17))
+                  ],
+                ),
+                Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.download_for_offline, color: Colors.green,size: 30
+                      ),
+                      onPressed: (){
+                        _captureAndSave(isPdf: true); // Save as PDF
+                      },
+                    ),
+                    Text('.pdf',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 17),)
+                  ],
+                )
+              ],
             ),
           ],
         ),

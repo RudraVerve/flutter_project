@@ -20,12 +20,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter ID Card',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter Demo Id Card'),
     );
   }
 }
@@ -59,11 +59,6 @@ class _MyHomePageState extends State<MyHomePage> {
   String? dob;
   String? idno;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void clearForm() {
     CompanyController.clear();
     nameController.clear();
@@ -74,11 +69,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _insert(Uint8List imageBytes, Uint8List imageBytes2) async {
     var obj = insert_data(
-      name: nameController.text,
-      Company: CompanyController.text,
-      id: IdController.text,
-      Technology: TechnologyController.text,
-      dob: dobController.text,
+      name: nameController.text.toUpperCase(),
+      Company: CompanyController.text.toUpperCase(),
+      id: IdController.text.toUpperCase(),
+      Technology: TechnologyController.text.toUpperCase(),
+      dob: dobController.text.toUpperCase(),
     );
     final id = await dbhelper.insert(obj, obj.id!, imageBytes, imageBytes2);
     if (id == -1) {
